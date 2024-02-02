@@ -1,88 +1,45 @@
 #include "init.hpp"
-#include "draw.hpp"
 #include "input.hpp"
-#include "structs.hpp"
-#include "defs.hpp"
+#include "draw.hpp"
+#include "stage.hpp"
 
 App app;
-Entity player;
-Entity bullet;
+Stage stage;
 
 int main(int argc, char const *argv[])
 {
-    memset(&app, 0, sizeof(App));
-    memset(&player, 0, sizeof(Entity));
-    memset(&bullet, 0, sizeof(Entity));
+    u_int64_t then;
+    float remainder;
 
     initSDL();
 
     atexit(cleanUp);
 
-    player.x = 100;
-    player.y = 100;
-    player.texture = loadTexture("/home/zhifang/Documents/Shooter-Game/gfx/player.png");
+    Stage stage;
 
-    bullet.texture = loadTexture("/home/zhifang/Documents/Shooter-Game/gfx/playerBullet.png");
-    int center_x, center_y;
-    SDL_QueryTexture(player.texture, nullptr, nullptr, &center_x, &center_y);
-    center_y /= 2;
-    
+    app.delegate.logic = [&stage]()
+    { stage.logic(); };
+
+    app.delegate.draw = [&stage]()
+    { stage.draw(); };
+
+    then = SDL_GetTicks();
+
+    remainder = 0;
+
     while (true)
     {
         prepareScene();
 
         doInput();
 
-        player.x += player.dx;
-        player.y += player.dy;
+        app.delegate.logic();
 
-        if (app.up)
-        {
-            player.y -= 4;
-        }
-
-        if (app.down)
-        {
-            player.y += 4;
-        }
-
-        if (app.left)
-        {
-            player.x -= 4;
-        }
-
-        if (app.right)
-        {
-            player.x += 4;
-        }
-
-        if (app.fire && bullet.health == 0)
-        {
-            bullet.x = player.x + center_x;
-            bullet.y = player.y + center_y;
-            bullet.dx = 16;
-            bullet.dy = 0;
-            bullet.health = 1;
-        }
-        
-        bullet.x += bullet.dx;
-        bullet.y += bullet.dy;
-
-        if (bullet.x > SCREEN_WIDTH)
-        {
-            bullet.health = 0;
-        }
-        
-        blit(player.texture, player.x, player.y);
-        
-        if (bullet.health > 0)
-        {
-            blit(bullet.texture, bullet.x, bullet.y);
-        }
+        app.delegate.draw();
 
         presentScene();
 
-        SDL_Delay(16);
+        capFrameRate(then, remainder);
     }
 
     return 0;

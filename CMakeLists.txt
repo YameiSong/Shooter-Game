@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(mygame)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
@@ -24,7 +25,7 @@ add_executable(mygame main.cpp)
 
 target_include_directories(mygame PRIVATE src)
 target_link_libraries(mygame PRIVATE lib1)
-target_compile_options(mygame PRIVATE -Wall -Wextra)
+target_compile_options(mygame PRIVATE -g -Wall -Wextra)
 
 # SDL2::SDL2main may or may not be available. It is e.g. required by Windows GUI applications
 if(TARGET SDL2::SDL2main)

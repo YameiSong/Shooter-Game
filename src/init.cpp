@@ -1,9 +1,11 @@
 #include "init.hpp"
 #include "defs.hpp"
 #include "structs.hpp"
+#include "stage.hpp"
 #include <SDL2/SDL_image.h>
 
 extern App app;
+extern Stage stage;
 
 void initSDL()
 {
@@ -45,5 +47,13 @@ void initSDL()
 
 void cleanUp()
 {
+    SDL_DestroyRenderer(app.renderer);
+    app.renderer = nullptr;
+    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Destory renderer");
+
+    SDL_DestroyWindow(app.window);
+    app.window = nullptr;
+    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Destory window");
+    
     SDL_Quit();
 }

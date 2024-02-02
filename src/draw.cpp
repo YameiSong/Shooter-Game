@@ -30,8 +30,30 @@ void blit(SDL_Texture *texture, int x, int y)
     dest.x = x;
     dest.y = y;
     SDL_QueryTexture(texture, nullptr, nullptr, &dest.w, &dest.h);
-    // double the size of texture
-    // dest.w *= 2;
-    // dest.h *= 2;
     SDL_RenderCopy(app.renderer, texture, nullptr, &dest);
+}
+
+/*
+Adjust frame rate to 60fps
+*/
+void capFrameRate(uint64_t &then, float &remainder)
+{
+    uint64_t wait, frameTime;
+
+    wait = 16 + remainder;
+
+    remainder -= static_cast<int>(remainder);
+
+    frameTime = SDL_GetTicks64() - then;
+
+    wait -= frameTime;
+
+    if (wait < 1)
+        wait = 1;
+
+    SDL_Delay(wait);
+
+    remainder += 0.667;
+
+    then = SDL_GetTicks64();
 }

@@ -31,59 +31,16 @@ void doInput()
 
 void doKeyDown(SDL_KeyboardEvent *event)
 {
-    if (event->keysym.scancode == SDL_SCANCODE_UP)
+    if (event->repeat == 0 && event->keysym.scancode < MAX_KEYBOARD_KEYS)
     {
-        app.up = true;
-    }
-    
-    if (event->keysym.scancode == SDL_SCANCODE_DOWN)
-    {
-        app.down = true;
-    }
-    
-    if (event->keysym.scancode == SDL_SCANCODE_LEFT)
-    {
-        app.left = true;
-    }
-    
-    if (event->keysym.scancode == SDL_SCANCODE_RIGHT)
-    {
-        app.right = true;
-    }
-    
-    if (event->keysym.scancode == SDL_SCANCODE_LCTRL)
-    {
-        app.fire = true;
+        app.keyboard[event->keysym.scancode] = true;
     }
 }
 
 void doKeyUp(SDL_KeyboardEvent *event)
 {
-    if (event->repeat == 0)
+    if (event->repeat == 0 && event->keysym.scancode < MAX_KEYBOARD_KEYS)
     {
-        if (event->keysym.scancode == SDL_SCANCODE_UP)
-        {
-            app.up = false;
-        }
-        
-        if (event->keysym.scancode == SDL_SCANCODE_DOWN)
-        {
-            app.down = false;
-        }
-        
-        if (event->keysym.scancode == SDL_SCANCODE_LEFT)
-        {
-            app.left = false;
-        }
-        
-        if (event->keysym.scancode == SDL_SCANCODE_RIGHT)
-        {
-            app.right = false;
-        }
-        
-        if (event->keysym.scancode == SDL_SCANCODE_LCTRL)
-        {
-            app.fire = false;
-        }
+        app.keyboard[event->keysym.scancode] = false;
     }
 }
