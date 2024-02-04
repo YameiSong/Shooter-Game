@@ -17,6 +17,12 @@ struct App
     bool keyboard[MAX_KEYBOARD_KEYS];
 };
 
+enum class Side
+{
+    Player,
+    Alien
+};
+
 struct Entity
 {
     float x;
@@ -27,5 +33,6 @@ struct Entity
     float dy;
     int health;
     int reload; // 8 frames (approx 0.133333 seconds) must pass before we can fire again
-    SDL_Texture* texture;
+    Side side;
+    SDL_Texture *texture;
 };
