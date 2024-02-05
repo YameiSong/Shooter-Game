@@ -5,6 +5,7 @@
 #define PLAYER_SPEED 4
 #define PLAYER_BULLET_SPEED 16
 #define ALIEN_BULLET_SPEED 8
+#define MAX_STARS 500
 
 #define MAX_KEYBOARD_KEYS 350
 
@@ -12,3 +13,5 @@
 #define BULLET_TEXTURE_PATH "gfx/playerBullet.png"
 #define ENEMY_TEXTURE_PATH "gfx/enemy.png"
 #define ALIEN_BULLET_TEXTURE_PATH "gfx/alienBullet.png"
+#define BACKGROUND_TEXTURE_PATH "gfx/background.png"
+#define EXPLOSION_TEXTURE_PATH "gfx/explosion.png"

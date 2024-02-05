@@ -36,3 +36,30 @@ struct Entity
     Side side;
     SDL_Texture *texture;
 };
+
+struct Explosion
+{
+    float x;
+    float y;
+    float dx;
+    float dy;
+    int r, g, b, a;
+};
+
+struct Debris
+{
+    float x;
+    float y;
+    float dx;
+    float dy;
+    int life;
+    SDL_Rect rect;
+    SDL_Texture *texture;
+};
+
+struct Star
+{
+    int x;
+    int y;
+    int speed;
+};

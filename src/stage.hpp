@@ -1,6 +1,7 @@
 #include "structs.hpp"
 #include <list>
 #include <memory>
+#include <vector>
 
 class Stage
 {
@@ -9,28 +10,45 @@ class Stage
 private:
     void resetStage();
     void initPlayer();
+    void initStarfield();
     void doPlayer();
     void doBullets();
     void doEnemies();
+    void doBackground();
+    void doStarfield();
+    void doExplosions();
+    void doDebris();
     void spawnEnemies();
     void fireBullet();
     void fireAlienBullet(EntityIt enemy);
-    bool bulletHitFighter(EntityIt bullet);
+    bool bulletHitEnemy(EntityIt bullet);
     bool enemyHitPlayer(EntityIt enemy);
+    void addExplosions(int x, int y, int num);
+    void addDebris(Entity* e);
     void drawPlayer();
     void drawBullets();
     void drawFighters();
+    void drawBackground();
+    void drawStarfield();
+    void drawDebris();
+    void drawExplosions();
     void clipPlayer();
 
     int enemySpawnTimer = 0;
     int stageResetTimer = FPS * 2;
+    int backgroundX = 0;
     std::unique_ptr<Entity> player;
     SDL_Texture *playerTexture;
     SDL_Texture *bulletTexture;
     SDL_Texture *enemyTexture;
     SDL_Texture *alienBulletTexture;
-    std::list<Entity> enemies;
-    std::list<Entity> bullets;
+    SDL_Texture *backgroundTexture;
+    SDL_Texture *explosionTexture;
+    std::list<Entity> list_enemy;
+    std::list<Entity> list_bullet;
+    std::list<Explosion> list_explosion;
+    std::list<Debris> list_debris;
+    std::vector<Star> stars;
 
 public:
     Stage();

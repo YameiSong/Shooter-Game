@@ -5,12 +5,14 @@
 #include "util.hpp"
 #include <cstdlib>
 #include <ctime>
+// TODO: 1. player always alive 2. no starfield
+using namespace std;
 
 extern App app;
 
-Stage::Stage() : player(nullptr)
+Stage::Stage() : player(nullptr), stars(MAX_STARS)
 {
-    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+    srand(static_cast<unsigned int>(time(nullptr)));
 
     playerTexture = loadTexture(PLAYER_TEXTURE_PATH);
 
@@ -19,6 +21,10 @@ Stage::Stage() : player(nullptr)
     enemyTexture = loadTexture(ENEMY_TEXTURE_PATH);
 
     alienBulletTexture = loadTexture(ALIEN_BULLET_TEXTURE_PATH);
+
+    backgroundTexture = loadTexture(BACKGROUND_TEXTURE_PATH);
+
+    explosionTexture = loadTexture(EXPLOSION_TEXTURE_PATH);
 
     initPlayer();
 }
@@ -30,8 +36,8 @@ Stage::~Stage()
     SDL_DestroyTexture(bulletTexture);
     SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Destory bullet texture");
 
-    auto it_fighter = enemies.begin();
-    while (it_fighter != enemies.end())
+    auto it_fighter = list_enemy.begin();
+    while (it_fighter != list_enemy.end())
     {
         if (it_fighter->texture != nullptr)
         {
@@ -41,8 +47,8 @@ Stage::~Stage()
         it_fighter++;
     }
 
-    auto it_bullet = bullets.begin();
-    while (it_bullet != bullets.end())
+    auto it_bullet = list_bullet.begin();
+    while (it_bullet != list_bullet.end())
     {
         if (it_bullet->texture != nullptr)
         {
@@ -61,6 +67,10 @@ Stage::~Stage()
 
 void Stage::logic()
 {
+    doBackground();
+
+    doStarfield();
+
     doPlayer();
 
     doEnemies();
@@ -68,6 +78,10 @@ void Stage::logic()
     doBullets();
 
     spawnEnemies();
+
+    doExplosions();
+
+    doDebris();
 
     clipPlayer();
 
@@ -79,11 +93,19 @@ void Stage::logic()
 
 void Stage::draw()
 {
+    drawBackground();
+
+    drawStarfield();
+
     drawPlayer();
 
     drawBullets();
 
     drawFighters();
+
+    drawDebris();
+
+    drawExplosions();
 }
 
 void Stage::initPlayer()
@@ -93,24 +115,46 @@ void Stage::initPlayer()
     player->y = 100;
     player->side = Side::Player;
     player->health = 10;
+    player->reload = 0;
     player->texture = playerTexture;
     SDL_QueryTexture(player->texture, nullptr, nullptr, &player->w, &player->h);
 }
 
+void Stage::initStarfield()
+{
+    for (size_t i = 0; i < MAX_STARS; i++)
+    {
+        stars[i].x = rand() % SCREEN_WIDTH;
+        stars[i].y = rand() % SCREEN_HEIGHT;
+        stars[i].speed = 1 + rand() % 8;
+    }
+}
+
 void Stage::resetStage()
 {
-    enemies.clear();
-    bullets.clear();
+    list_enemy.clear();
+    list_bullet.clear();
+    list_explosion.clear();
+    list_debris.clear();
 
     initPlayer();
 
+    initStarfield();
+
     enemySpawnTimer = 0;
 
-    stageResetTimer = FPS * 2;
+    stageResetTimer = FPS * 3;
 }
 
 void Stage::doPlayer()
 {
+    if (player->health == 0)
+    {
+        addExplosions(player->x, player->y, rand() % 10 + 10);
+        addDebris(player.get());
+        player.reset(nullptr);
+    }
+
     if (player.get() == nullptr)
     {
         return;
@@ -154,15 +198,19 @@ void Stage::doPlayer()
 
 void Stage::doBullets()
 {
-    auto it = bullets.begin();
-    while (it != bullets.end())
+    auto it = list_bullet.begin();
+    while (it != list_bullet.end())
     {
         it->x += it->dx;
         it->y += it->dy;
 
-        if (it->x > SCREEN_WIDTH || bulletHitFighter(it))
+        if (bulletHitEnemy(it) ||
+            it->x > SCREEN_WIDTH ||
+            it->y > SCREEN_HEIGHT ||
+            it->x < -it->w ||
+            it->y < -it->h)
         {
-            it = bullets.erase(it);
+            it = list_bullet.erase(it);
         }
         else
         {
@@ -173,8 +221,8 @@ void Stage::doBullets()
 
 void Stage::doEnemies()
 {
-    auto it = enemies.begin();
-    while (it != enemies.end())
+    auto it = list_enemy.begin();
+    while (it != list_enemy.end())
     {
         it->x += it->dx;
 
@@ -188,7 +236,7 @@ void Stage::doEnemies()
         // erase out of boundary enemies
         if (it->x < -it->w || it->health == 0 || enemyHitPlayer(it))
         {
-            it = enemies.erase(it);
+            it = list_enemy.erase(it);
         }
         else
         {
@@ -196,6 +244,66 @@ void Stage::doEnemies()
             {
                 fireAlienBullet(it);
             }
+            it++;
+        }
+    }
+}
+
+void Stage::doBackground()
+{
+    if (--backgroundX < -SCREEN_WIDTH)
+    {
+        backgroundX = 0;
+    }
+}
+
+void Stage::doStarfield()
+{
+    for (size_t i = 0; i < MAX_STARS; i++)
+    {
+        stars[i].x -= stars[i].speed;
+
+        if (stars[i].x < 0)
+        {
+            stars[i].x = SCREEN_WIDTH + stars[i].x;
+        }
+    }
+}
+
+void Stage::doExplosions()
+{
+    auto it = list_explosion.begin();
+    while (it != list_explosion.end())
+    {
+        it->x += it->dx;
+        it->y += it->dy;
+
+        if (--it->a <= 0)
+        {
+            it = list_explosion.erase(it);
+        }
+        else
+        {
+            it++;
+        }
+    }
+}
+
+void Stage::doDebris()
+{
+    auto it = list_debris.begin();
+    while (it != list_debris.end())
+    {
+        it->x += it->dx;
+        it->y += it->dy;
+        it->dy += 0.5;
+
+        if (--it->life <= 0)
+        {
+            it = list_debris.erase(it);
+        }
+        else
+        {
             it++;
         }
     }
@@ -216,7 +324,7 @@ void Stage::fireBullet()
 
     bullet.side = Side::Player;
 
-    bullets.emplace_back(std::move(bullet));
+    list_bullet.emplace_back(move(bullet));
 
     player->reload = 8;
 }
@@ -240,18 +348,25 @@ void Stage::fireAlienBullet(EntityIt enemy)
     bullet.dx *= ALIEN_BULLET_SPEED;
     bullet.dy *= ALIEN_BULLET_SPEED;
 
-    enemy->reload = (std::rand() % FPS * 2);
+    list_bullet.emplace_back(move(bullet));
+
+    enemy->reload = (rand() % FPS * 2);
 }
 
-bool Stage::bulletHitFighter(EntityIt bullet)
+bool Stage::bulletHitEnemy(EntityIt bullet)
 {
-    for (auto it = enemies.begin(); it != enemies.end(); it++)
+    for (auto it = list_enemy.begin(); it != list_enemy.end(); it++)
     {
         if (bullet->side != it->side &&
             collision(bullet->x, bullet->y, bullet->w, bullet->h, it->x, it->y, it->w, it->h))
         {
             bullet->health = 0;
             it->health--;
+            if (it->health == 0)
+            {
+                addExplosions(it->x, it->y, rand() % 10 + 5);
+                addDebris(&(*it));
+            }
             return true;
         }
     }
@@ -264,9 +379,85 @@ bool Stage::enemyHitPlayer(EntityIt enemy)
     {
         player->health--;
         enemy->health = 0;
+        addExplosions(enemy->x, enemy->y, rand() % 10 + 5);
+        addDebris(&(*enemy));
         return true;
     }
     return false;
+}
+
+void Stage::addExplosions(int x, int y, int num)
+{
+    for (size_t i = 0; i < num; i++)
+    {
+        Explosion e;
+
+        // explosion position and speed
+        e.x = x + (rand() % 32) - (rand() % 32);
+        e.y = y + (rand() % 32) - (rand() % 32);
+        e.dx = (rand() % 10) - (rand() % 10);
+        e.dy = (rand() % 10) - (rand() % 10);
+        e.dx /= 10;
+        e.dy /= 10;
+
+        // explosion color
+        switch (rand() % 4)
+        {
+        case 0:
+            e.r = 255;
+            break;
+
+        case 1:
+            e.r = 255;
+            e.g = 128;
+            break;
+
+        case 2:
+            e.r = 255;
+            e.g = 255;
+            break;
+
+        default:
+            e.r = 255;
+            e.g = 255;
+            e.b = 255;
+            break;
+        }
+
+        // explosion lifetime
+        e.a = rand() % FPS * 3;
+
+        list_explosion.emplace_back(move(e));
+    }
+}
+
+void Stage::addDebris(Entity *e)
+{
+    int x, y, w, h;
+
+    w = e->w / 2;
+    h = e->h / 2;
+
+    for (y = 0; y <= h; y += h)
+    {
+        for (x = 0; x <= w; x += w)
+        {
+            Debris d;
+
+            d.x = e->x + e->w / 2;
+            d.y = e->y + e->h / 2;
+            d.dx = (rand() % 5) - (rand() % 5);
+            d.dy = -(5 + rand() % 12);
+            d.life = FPS * 2;
+            d.texture = e->texture;
+            d.rect.x = x;
+            d.rect.y = y;
+            d.rect.w = w;
+            d.rect.h = h;
+
+            list_debris.emplace_back(move(d));
+        }
+    }
 }
 
 void Stage::spawnEnemies()
@@ -275,15 +466,16 @@ void Stage::spawnEnemies()
     {
         Entity enemy;
         enemy.x = SCREEN_WIDTH;
-        enemy.y = std::rand() % SCREEN_HEIGHT;
+        enemy.y = rand() % SCREEN_HEIGHT;
         enemy.texture = enemyTexture;
         SDL_QueryTexture(enemy.texture, nullptr, nullptr, &enemy.w, &enemy.h);
-        enemy.dx = -(2 + (std::rand() % 4)); // [-2, -5]
-        enemy.dy = std::rand() % 3 - 1;      // [-1, 1]
+        enemy.dx = -(2 + (rand() % 4)); // [-2, -5]
+        enemy.dy = rand() % 3 - 1;      // [-1, 1]
         enemy.health = 2;
         enemy.side = Side::Alien;
-        enemySpawnTimer = 60 + (std::rand() % 60);
-        enemies.emplace_back(std::move(enemy));
+        enemy.reload = FPS * (1 + (rand() % 3));
+        enemySpawnTimer = 60 + (rand() % 60);
+        list_enemy.emplace_back(move(enemy));
     }
 }
 
@@ -294,7 +486,7 @@ void Stage::drawPlayer()
 
 void Stage::drawBullets()
 {
-    for (auto it = bullets.begin(); it != bullets.end(); it++)
+    for (auto it = list_bullet.begin(); it != list_bullet.end(); it++)
     {
         blit(it->texture, it->x, it->y);
     }
@@ -302,8 +494,83 @@ void Stage::drawBullets()
 
 void Stage::drawFighters()
 {
-    for (auto it = enemies.begin(); it != enemies.end(); it++)
+    for (auto it = list_enemy.begin(); it != list_enemy.end(); it++)
     {
         blit(it->texture, it->x, it->y);
+    }
+}
+
+void Stage::drawBackground()
+{
+    SDL_Rect dest;
+
+    for (int x = backgroundX; x < SCREEN_WIDTH; x += SCREEN_WIDTH)
+    {
+        dest.x = x;
+        dest.y = 0;
+        dest.w = SCREEN_WIDTH;
+        dest.h = SCREEN_HEIGHT;
+
+        SDL_RenderCopy(app.renderer, backgroundTexture, nullptr, &dest);
+    }
+}
+
+void Stage::drawStarfield()
+{
+    for (size_t i = 0; i < MAX_STARS; i++)
+    {
+        int c = 32 * stars[i].speed;
+
+        SDL_SetRenderDrawColor(app.renderer, c, c, c, 255);
+
+        SDL_RenderDrawLine(app.renderer, stars[i].x, stars[i].y, stars[i].x + 2, stars[i].y);
+    }
+}
+
+void Stage::drawDebris()
+{
+    for (auto it = list_debris.begin(); it != list_debris.end(); it++)
+    {
+        blitRect(it->texture, &it->rect, it->x, it->y);
+    }
+}
+
+void Stage::drawExplosions()
+{
+    SDL_SetRenderDrawBlendMode(app.renderer, SDL_BLENDMODE_ADD);
+    SDL_SetTextureBlendMode(explosionTexture, SDL_BLENDMODE_ADD);
+
+    for (auto it = list_explosion.begin(); it != list_explosion.end(); it++)
+    {
+        SDL_SetTextureColorMod(explosionTexture, it->r, it->g, it->b);
+        SDL_SetTextureAlphaMod(explosionTexture, it->a);
+
+        blit(explosionTexture, it->x, it->y);
+    }
+
+    SDL_SetRenderDrawBlendMode(app.renderer, SDL_BLENDMODE_NONE);
+}
+
+// Stops the player from leave the screen and also prevents them from moving forward any further than about the midway point.
+void Stage::clipPlayer()
+{
+    if (player.get() != nullptr)
+    {
+        if (player->x < 0)
+        {
+            player->x = 0;
+        }
+        if (player->y < 0)
+        {
+            player->y = 0;
+        }
+        if (player->x > SCREEN_WIDTH / 2)
+        {
+            player->x = SCREEN_WIDTH / 2;
+        }
+        if (player->y > SCREEN_HEIGHT - player->h)
+        {
+            player->y = SCREEN_HEIGHT - player->h;
+        }
     }
 }
