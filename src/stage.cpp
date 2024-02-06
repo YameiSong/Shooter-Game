@@ -5,7 +5,7 @@
 #include "util.hpp"
 #include <cstdlib>
 #include <ctime>
-// TODO: 1. player always alive 2. no starfield
+
 using namespace std;
 
 extern App app;
@@ -26,13 +26,16 @@ Stage::Stage() : player(nullptr), stars(MAX_STARS)
 
     explosionTexture = loadTexture(EXPLOSION_TEXTURE_PATH);
 
-    initPlayer();
+    resetStage();
 }
 
 Stage::~Stage()
 {
-    SDL_DestroyTexture(player->texture);
-    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Destory player texture");
+    if (player.get() != nullptr)
+    {
+        SDL_DestroyTexture(player->texture);
+        SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Destory player texture");
+    }
     SDL_DestroyTexture(bulletTexture);
     SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Destory bullet texture");
 
@@ -148,15 +151,14 @@ void Stage::resetStage()
 
 void Stage::doPlayer()
 {
+    if (player.get() == nullptr)
+        return;
+
     if (player->health == 0)
     {
         addExplosions(player->x, player->y, rand() % 10 + 10);
         addDebris(player.get());
         player.reset(nullptr);
-    }
-
-    if (player.get() == nullptr)
-    {
         return;
     }
 
@@ -205,6 +207,7 @@ void Stage::doBullets()
         it->y += it->dy;
 
         if (bulletHitEnemy(it) ||
+            bulletHitPlayer(it) ||
             it->x > SCREEN_WIDTH ||
             it->y > SCREEN_HEIGHT ||
             it->x < -it->w ||
@@ -373,8 +376,26 @@ bool Stage::bulletHitEnemy(EntityIt bullet)
     return false;
 }
 
+bool Stage::bulletHitPlayer(EntityIt bullet)
+{
+    if (player.get() == nullptr)
+        return false;
+
+    if (bullet->side != player->side &&
+        collision(bullet->x, bullet->y, bullet->w, bullet->h, player->x, player->y, player->w, player->h))
+    {
+        bullet->health = 0;
+        player->health--;
+        return true;
+    }
+    return false;
+}
+
 bool Stage::enemyHitPlayer(EntityIt enemy)
 {
+    if (player.get() == nullptr)
+        return false;
+
     if (collision(player->x, player->y, player->w, player->h, enemy->x, enemy->y, enemy->w, enemy->h))
     {
         player->health--;
@@ -481,6 +502,9 @@ void Stage::spawnEnemies()
 
 void Stage::drawPlayer()
 {
+    if (player.get() == nullptr)
+        return;
+
     blit(player->texture, player->x, player->y);
 }
 
@@ -523,7 +547,8 @@ void Stage::drawStarfield()
 
         SDL_SetRenderDrawColor(app.renderer, c, c, c, 255);
 
-        SDL_RenderDrawLine(app.renderer, stars[i].x, stars[i].y, stars[i].x + 2, stars[i].y);
+        SDL_RenderDrawLine(app.renderer, stars[i].x, stars[i].y, stars[i].x + 3, stars[i].y);
+        SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "draw starfield c: %d, x: %d, y: %d", c, stars[i].x, stars[i].y);
     }
 }
 
@@ -554,23 +579,23 @@ void Stage::drawExplosions()
 // Stops the player from leave the screen and also prevents them from moving forward any further than about the midway point.
 void Stage::clipPlayer()
 {
-    if (player.get() != nullptr)
+    if (player.get() == nullptr)
+        return;
+
+    if (player->x < 0)
     {
-        if (player->x < 0)
-        {
-            player->x = 0;
-        }
-        if (player->y < 0)
-        {
-            player->y = 0;
-        }
-        if (player->x > SCREEN_WIDTH / 2)
-        {
-            player->x = SCREEN_WIDTH / 2;
-        }
-        if (player->y > SCREEN_HEIGHT - player->h)
-        {
-            player->y = SCREEN_HEIGHT - player->h;
-        }
+        player->x = 0;
+    }
+    if (player->y < 0)
+    {
+        player->y = 0;
+    }
+    if (player->x > SCREEN_WIDTH / 2)
+    {
+        player->x = SCREEN_WIDTH / 2;
+    }
+    if (player->y > SCREEN_HEIGHT - player->h)
+    {
+        player->y = SCREEN_HEIGHT - player->h;
     }
 }

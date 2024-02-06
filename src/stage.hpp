@@ -22,6 +22,7 @@ private:
     void fireBullet();
     void fireAlienBullet(EntityIt enemy);
     bool bulletHitEnemy(EntityIt bullet);
+    bool bulletHitPlayer(EntityIt bullet);
     bool enemyHitPlayer(EntityIt enemy);
     void addExplosions(int x, int y, int num);
     void addDebris(Entity* e);
