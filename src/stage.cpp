@@ -10,7 +10,7 @@ using namespace std;
 
 extern App app;
 
-Stage::Stage() : player(nullptr), stars(MAX_STARS)
+Stage::Stage() : player(nullptr), stars(MAX_STARS), audio_player()
 {
     srand(static_cast<unsigned int>(time(nullptr)));
 
@@ -189,9 +189,10 @@ void Stage::doPlayer()
         player->dx = PLAYER_SPEED;
     }
 
-    if (app.keyboard[SDL_SCANCODE_LCTRL] && player->reload == 0)
+    if (app.keyboard[SDL_SCANCODE_LCTRL] && player->reload <= 0)
     {
         fireBullet();
+        audio_player.playSound(SND_Player_Fire, CH_Player);
     }
 
     player->x += player->dx;
@@ -246,6 +247,7 @@ void Stage::doEnemies()
             if (player.get() != nullptr && --it->reload <= 0)
             {
                 fireAlienBullet(it);
+                audio_player.playSound(SND_Alien_Fire, CH_Alien_Fire);
             }
             it++;
         }
@@ -363,6 +365,7 @@ bool Stage::bulletHitEnemy(EntityIt bullet)
         if (bullet->side != it->side &&
             collision(bullet->x, bullet->y, bullet->w, bullet->h, it->x, it->y, it->w, it->h))
         {
+            audio_player.playSound(SND_Alien_Die, CH_Any); // play multiple explosion sounds at the same time
             bullet->health = 0;
             it->health--;
             if (it->health == 0)
@@ -384,6 +387,7 @@ bool Stage::bulletHitPlayer(EntityIt bullet)
     if (bullet->side != player->side &&
         collision(bullet->x, bullet->y, bullet->w, bullet->h, player->x, player->y, player->w, player->h))
     {
+        audio_player.playSound(SND_Player_Die, CH_Player);
         bullet->health = 0;
         player->health--;
         return true;
@@ -548,7 +552,6 @@ void Stage::drawStarfield()
         SDL_SetRenderDrawColor(app.renderer, c, c, c, 255);
 
         SDL_RenderDrawLine(app.renderer, stars[i].x, stars[i].y, stars[i].x + 3, stars[i].y);
-        SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "draw starfield c: %d, x: %d, y: %d", c, stars[i].x, stars[i].y);
     }
 }
 

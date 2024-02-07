@@ -1,6 +1,5 @@
 #include "draw.hpp"
 #include "structs.hpp"
-#include <SDL2/SDL_image.h>
 
 extern App app;
 

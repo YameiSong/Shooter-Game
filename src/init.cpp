@@ -2,7 +2,6 @@
 #include "defs.hpp"
 #include "structs.hpp"
 #include "stage.hpp"
-#include <SDL2/SDL_image.h>
 
 extern App app;
 extern Stage stage;
@@ -45,6 +44,15 @@ void initSDL()
     IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
 
     // SDL_ShowCursor(SDL_DISABLE);
+
+    if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) == -1)
+    {
+        printf("Couldn't initialize SDL Mixer\n");
+        SDL_Log("Mixer Initialization Error: %s", Mix_GetError());
+        exit(1);
+    }
+
+    Mix_AllocateChannels(MAX_SOUND_CHANNELS);
 }
 
 void cleanUp()
@@ -56,6 +64,6 @@ void cleanUp()
     SDL_DestroyWindow(app.window);
     app.window = nullptr;
     SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Destory window");
-    
+
     SDL_Quit();
 }

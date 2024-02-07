@@ -1,4 +1,5 @@
 #include "structs.hpp"
+#include "audio_player.hpp"
 #include <list>
 #include <memory>
 #include <vector>
@@ -50,6 +51,7 @@ private:
     std::list<Explosion> list_explosion;
     std::list<Debris> list_debris;
     std::vector<Star> stars;
+    AudioPlayer audio_player;
 
 public:
     Stage();
