@@ -1,5 +1,6 @@
 #include "structs.hpp"
 #include "audio_player.hpp"
+#include "text.hpp"
 #include <list>
 #include <memory>
 #include <vector>
@@ -34,8 +35,11 @@ private:
     void drawStarfield();
     void drawDebris();
     void drawExplosions();
+    void drawHud();
     void clipPlayer();
 
+    int score = 0;
+    int highscore = 0;
     int enemySpawnTimer = 0;
     int stageResetTimer = FPS * 2;
     int backgroundX = 0;
@@ -52,6 +56,7 @@ private:
     std::list<Debris> list_debris;
     std::vector<Star> stars;
     AudioPlayer audio_player;
+    Text text;
 
 public:
     Stage();

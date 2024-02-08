@@ -3,13 +3,15 @@
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 #define FPS 60
+#define MAX_KEYBOARD_KEYS 350
+#define MAX_LINE_LENGTH 1024
+#define GLYPH_WIDTH 18
+#define GLYPH_HEIGHT 24
 
 #define PLAYER_SPEED 4
 #define PLAYER_BULLET_SPEED 16
 #define ALIEN_BULLET_SPEED 8
 #define MAX_STARS 500
-
-#define MAX_KEYBOARD_KEYS 350
 
 #define PLAYER_TEXTURE_PATH "gfx/player.png"
 #define BULLET_TEXTURE_PATH "gfx/playerBullet.png"
@@ -17,6 +19,8 @@
 #define ALIEN_BULLET_TEXTURE_PATH "gfx/alienBullet.png"
 #define BACKGROUND_TEXTURE_PATH "gfx/background.png"
 #define EXPLOSION_TEXTURE_PATH "gfx/explosion.png"
+
+#define FONT_TEXTURE_PATH "gfx/font.png"
 
 #define MAX_SOUND_CHANNELS 8
 

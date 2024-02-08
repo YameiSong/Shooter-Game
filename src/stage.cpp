@@ -109,6 +109,8 @@ void Stage::draw()
     drawDebris();
 
     drawExplosions();
+
+    drawHud();
 }
 
 void Stage::initPlayer()
@@ -143,6 +145,8 @@ void Stage::resetStage()
     initPlayer();
 
     initStarfield();
+
+    score = 0;
 
     enemySpawnTimer = 0;
 
@@ -366,6 +370,8 @@ bool Stage::bulletHitEnemy(EntityIt bullet)
             collision(bullet->x, bullet->y, bullet->w, bullet->h, it->x, it->y, it->w, it->h))
         {
             audio_player.playSound(SND_Alien_Die, CH_Any); // play multiple explosion sounds at the same time
+            score++;
+            highscore = max(highscore, score);
             bullet->health = 0;
             it->health--;
             if (it->health == 0)
@@ -577,6 +583,20 @@ void Stage::drawExplosions()
     }
 
     SDL_SetRenderDrawBlendMode(app.renderer, SDL_BLENDMODE_NONE);
+}
+
+void Stage::drawHud()
+{
+    text.drawText(10, 10, 255, 255, 255, "SCORE: %03d", score);
+
+    if (score > 0 && score == highscore)
+    {
+        text.drawText(960, 10, 0, 255, 0, "HIGH SCORE: %03d", highscore);
+    }
+    else
+    {
+        text.drawText(960, 10, 255, 255, 255, "HIGH SCORE: %03d", highscore);
+    }
 }
 
 // Stops the player from leave the screen and also prevents them from moving forward any further than about the midway point.
