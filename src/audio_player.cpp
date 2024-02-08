@@ -34,6 +34,7 @@ void AudioPlayer::loadSounds()
     sounds[SND_Alien_Fire] = Mix_LoadWAV(ALIEN_FIRE_SOUND_PATH);
     sounds[SND_Player_Die] = Mix_LoadWAV(PLAYER_DIE_SOUND_PATH);
     sounds[SND_Alien_Die] = Mix_LoadWAV(ALIEN_DIE_SOUND_PATH);
+    sounds[SND_POINTS] = Mix_LoadWAV(POINTS_SOUND_PATH);
 }
 
 void AudioPlayer::loadMusic(std::string filename)

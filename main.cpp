@@ -6,7 +6,7 @@
 App app;
 Stage stage;
 
-int main(int argc, char const *argv[])
+int main()
 {
     u_int64_t then;
     float remainder;

@@ -20,6 +20,8 @@ Stage::Stage() : player(nullptr), stars(MAX_STARS), audio_player()
 
     enemyTexture = loadTexture(ENEMY_TEXTURE_PATH);
 
+    pointsTexture = loadTexture(POINTS_TEXTURE_PATH);
+
     alienBulletTexture = loadTexture(ALIEN_BULLET_TEXTURE_PATH);
 
     backgroundTexture = loadTexture(BACKGROUND_TEXTURE_PATH);
@@ -34,10 +36,11 @@ Stage::~Stage()
     if (player.get() != nullptr)
     {
         SDL_DestroyTexture(player->texture);
-        SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Destory player texture");
     }
+
     SDL_DestroyTexture(bulletTexture);
-    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Destory bullet texture");
+
+    SDL_DestroyTexture(pointsTexture);
 
     auto it_fighter = list_enemy.begin();
     while (it_fighter != list_enemy.end())
@@ -45,7 +48,6 @@ Stage::~Stage()
         if (it_fighter->texture != nullptr)
         {
             SDL_DestroyTexture(it_fighter->texture);
-            SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Destory enemy texture");
         }
         it_fighter++;
     }
@@ -56,16 +58,13 @@ Stage::~Stage()
         if (it_bullet->texture != nullptr)
         {
             SDL_DestroyTexture(it_bullet->texture);
-            SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Destory bullet texture");
         }
         it_bullet++;
     }
 
     SDL_DestroyTexture(enemyTexture);
-    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Destory enemy texture");
 
     SDL_DestroyTexture(alienBulletTexture);
-    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Destory alien bullet texture");
 }
 
 void Stage::logic()
@@ -86,6 +85,8 @@ void Stage::logic()
 
     doDebris();
 
+    doPointsPods();
+
     clipPlayer();
 
     if (player.get() == nullptr && --stageResetTimer <= 0)
@@ -99,6 +100,8 @@ void Stage::draw()
     drawBackground();
 
     drawStarfield();
+
+    drawPointsPods();
 
     drawPlayer();
 
@@ -139,6 +142,7 @@ void Stage::resetStage()
 {
     list_enemy.clear();
     list_bullet.clear();
+    list_point.clear();
     list_explosion.clear();
     list_debris.clear();
 
@@ -318,6 +322,57 @@ void Stage::doDebris()
     }
 }
 
+void Stage::doPointsPods()
+{
+    auto it = list_point.begin();
+    while (it != list_point.end())
+    {
+        if (it->x < 0)
+        {
+            it->x = 0;
+            it->dx = -it->dx;
+        }
+
+        if (it->x + it->w > SCREEN_WIDTH)
+        {
+            it->x = SCREEN_WIDTH - it->w;
+            it->dx = -it->dx;
+        }
+
+        if (it->y < 0)
+        {
+            it->y = 0;
+            it->dy = -it->dy;
+        }
+
+        if (it->y + it->h > SCREEN_HEIGHT)
+        {
+            it->y = SCREEN_HEIGHT - it->h;
+            it->dy = -it->dy;
+        }
+
+        it->x += it->dx;
+        it->y += it->dy;
+
+        if (player.get() != nullptr && collision(it->x, it->y, it->w, it->h, player->x, player->y, player->w, player->h))
+        {
+            it->health = 0;
+            score++;
+            highscore = max(highscore, score);
+            audio_player.playSound(SND_POINTS, CH_POINTS);
+        }
+
+        if (--it->health <= 0)
+        {
+            it = list_point.erase(it);
+        }
+        else
+        {
+            it++;
+        }
+    }
+}
+
 void Stage::fireBullet()
 {
     Entity bullet;
@@ -369,6 +424,7 @@ bool Stage::bulletHitEnemy(EntityIt bullet)
         if (bullet->side != it->side &&
             collision(bullet->x, bullet->y, bullet->w, bullet->h, it->x, it->y, it->w, it->h))
         {
+            addPointsPod(it->x + it->w / 2, it->y + it->h / 2);
             audio_player.playSound(SND_Alien_Die, CH_Any); // play multiple explosion sounds at the same time
             score++;
             highscore = max(highscore, score);
@@ -491,6 +547,24 @@ void Stage::addDebris(Entity *e)
     }
 }
 
+void Stage::addPointsPod(int x, int y)
+{
+    Entity point;
+    point.x = x;
+    point.y = y;
+    point.dx = -(rand() % 5);
+    point.dy = (rand() % 5) - (rand() % 5);
+    point.health = FPS * 10;
+    point.texture = pointsTexture;
+
+    SDL_QueryTexture(point.texture, nullptr, nullptr, &point.w, &point.h);
+
+    point.x -= point.w / 2;
+    point.y -= point.h / 2;
+
+    list_point.emplace_back(move(point));
+}
+
 void Stage::spawnEnemies()
 {
     if (--enemySpawnTimer <= 0)
@@ -596,6 +670,14 @@ void Stage::drawHud()
     else
     {
         text.drawText(960, 10, 255, 255, 255, "HIGH SCORE: %03d", highscore);
+    }
+}
+
+void Stage::drawPointsPods()
+{
+    for (auto it = list_point.begin(); it != list_point.end(); it++)
+    {
+        blit(it->texture, it->x, it->y);
     }
 }
 

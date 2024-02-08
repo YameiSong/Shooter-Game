@@ -17,7 +17,6 @@ void presentScene()
 SDL_Texture *loadTexture(std::string filename)
 {
     SDL_Texture *texture;
-    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Loading %s", filename.c_str());
     texture = IMG_LoadTexture(app.renderer, filename.c_str());
     return texture;
 }
