@@ -63,3 +63,14 @@ struct Star
     int y;
     int speed;
 };
+
+struct Highscore
+{
+    int recent;
+    int score;
+};
+
+struct Highscores
+{
+    Highscore highscore[NUM_HIGHSCORES];
+};

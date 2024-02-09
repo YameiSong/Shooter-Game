@@ -1,6 +1,6 @@
 #include "structs.hpp"
-#include "audio_player.hpp"
-#include "text.hpp"
+#include "audioPlayer.hpp"
+#include "Text.hpp"
 #include <list>
 #include <memory>
 #include <vector>

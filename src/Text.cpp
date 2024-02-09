@@ -1,4 +1,4 @@
-#include "text.hpp"
+#include "Text.hpp"
 
 Text::Text() : drawTextBuffer(new char[MAX_LINE_LENGTH])
 {

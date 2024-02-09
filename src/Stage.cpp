@@ -1,4 +1,4 @@
-#include "stage.hpp"
+#include "Stage.hpp"
 #include "common.hpp"
 #include "structs.hpp"
 #include "draw.hpp"
