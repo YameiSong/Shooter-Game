@@ -20,9 +20,9 @@ public:
     bool playing = false;
     SDL_Renderer *renderer;
     SDL_Window *window;
-    std::unique_ptr<Background> background;
     std::shared_ptr<AudioPlayer> audio_player;
     std::shared_ptr<Text> text;
     std::unique_ptr<Stage> stage;
+    std::unique_ptr<Background> background;
     std::unique_ptr<HighscoreTable> highscore_table;
 };

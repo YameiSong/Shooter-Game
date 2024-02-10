@@ -3,8 +3,6 @@
 #include "draw.hpp"
 #include "App.hpp"
 
-extern App app;
-
 Background::Background(
     SDL_Renderer *renderer) : stars(MAX_STARS),
                                               renderer(renderer),
