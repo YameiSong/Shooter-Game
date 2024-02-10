@@ -5,6 +5,7 @@
 #define FPS 60
 #define MAX_KEYBOARD_KEYS 350
 #define MAX_LINE_LENGTH 1024
+#define MAX_SCORE_NAME_LENGTH 16
 #define GLYPH_WIDTH 18
 #define GLYPH_HEIGHT 24
 
@@ -13,6 +14,7 @@
 #define ALIEN_BULLET_SPEED 8
 #define MAX_STARS 500
 #define NUM_HIGHSCORES 8
+#define ANONYMOUS "ANONYMOUS"
 
 #define PLAYER_TEXTURE_PATH "gfx/player.png"
 #define BULLET_TEXTURE_PATH "gfx/playerBullet.png"
@@ -47,4 +49,10 @@ enum Sound {
     SND_Alien_Die,
     SND_POINTS,
     SND_Max
+};
+
+enum TEXT_ALIGN {
+    ALIGN_LEFT,
+    ALIGN_CENTER,
+    ALIGN_RIGHT
 };

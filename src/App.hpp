@@ -4,6 +4,7 @@
 #include "AudioPlayer.hpp"
 #include "Background.hpp"
 #include <memory>
+#include <string>
 
 class App
 {
@@ -18,6 +19,7 @@ public:
     void doKeyDown(SDL_KeyboardEvent *event);
     void doKeyUp(SDL_KeyboardEvent *event);
     bool playing = false;
+    std::string inputText;
     SDL_Renderer *renderer;
     SDL_Window *window;
     std::shared_ptr<AudioPlayer> audio_player;

@@ -16,11 +16,11 @@ public:
     Text(SDL_Renderer *renderer);
     ~Text();
     template <typename... Args>
-    void drawText(int x, int y, int r, int g, int b, const char *format, Args... args);
+    void drawText(int x, int y, int r, int g, int b, int align, const char *format, Args... args);
 };
 
 template <typename... Args>
-void Text::drawText(int x, int y, int r, int g, int b, const char *format, Args... args)
+void Text::drawText(int x, int y, int r, int g, int b, int align, const char *format, Args... args)
 {
     int i, len, c;
     SDL_Rect rect;
@@ -28,6 +28,20 @@ void Text::drawText(int x, int y, int r, int g, int b, const char *format, Args.
     sprintf(drawTextBuffer.get(), format, args...);
 
     len = strlen(drawTextBuffer.get());
+
+    switch (align)
+    {
+    case ALIGN_RIGHT:
+        x -= len * GLYPH_WIDTH;
+        break;
+
+    case ALIGN_CENTER:
+        x -= len * GLYPH_WIDTH / 2;
+        break;
+    
+    default:
+        break;
+    }
 
     rect.w = GLYPH_WIDTH;
     rect.h = GLYPH_HEIGHT;

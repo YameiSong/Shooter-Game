@@ -20,7 +20,7 @@ App::App() : renderer(nullptr),
 
     stage.reset(new Stage(0, renderer, audio_player, text));
 
-    highscore_table.reset(new HighscoreTable(text));
+    highscore_table.reset(new HighscoreTable(renderer, text));
 
     audio_player->loadMusic(BGM);
     audio_player->playMusic(1);
@@ -100,6 +100,8 @@ void App::logic()
 
     if (!playing)
     {
+        highscore_table->logic(inputText);
+
         if (keyboard[SDL_SCANCODE_LCTRL])
         {
             playing = true;
@@ -144,6 +146,8 @@ void App::doInput()
 {
     SDL_Event event;
 
+    inputText.clear();
+
     while (SDL_PollEvent(&event))
     {
         switch (event.type)
@@ -158,6 +162,10 @@ void App::doInput()
 
         case SDL_KEYUP:
             doKeyUp(&event.key);
+            break;
+
+        case SDL_TEXTINPUT:
+            inputText = event.text.text;
             break;
 
         default:
