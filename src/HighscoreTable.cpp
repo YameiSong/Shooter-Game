@@ -1,6 +1,5 @@
 #include "HighscoreTable.hpp"
 #include "Stage.hpp"
-#include "structs.hpp"
 #include "defs.hpp"
 #include <algorithm>
 
@@ -22,7 +21,7 @@ void HighscoreTable::drawHighscores()
 {
     int y = 150;
 
-    text->drawText(425, 70, 255, 255, 255, "HIGHSCORES");
+    text->drawText(425, 70, 255, 255, 255, "%s", "HIGHSCORES");
 
     auto it = highscores.begin();
 
@@ -40,7 +39,7 @@ void HighscoreTable::drawHighscores()
         y += 50;
     }
 
-    text->drawText(425, 600, 255, 255, 255, "PRESS FIRE TO PLAY!");
+    text->drawText(425, 600, 255, 255, 255, "%s", "PRESS FIRE TO PLAY!");
 }
 
 void HighscoreTable::addHighscore(int score)

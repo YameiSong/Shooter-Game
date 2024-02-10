@@ -1,6 +1,5 @@
 #include "Stage.hpp"
 #include "common.hpp"
-#include "structs.hpp"
 #include "draw.hpp"
 #include "util.hpp"
 #include <cstdlib>
@@ -9,6 +8,46 @@
 using namespace std;
 
 extern bool keyboard[MAX_KEYBOARD_KEYS];
+
+enum class Stage::Side
+{
+    Player,
+    Alien
+};
+
+struct Stage::Entity
+{
+    float x;
+    float y;
+    int w;
+    int h;
+    float dx;
+    float dy;
+    int health;
+    int reload; // 8 frames (approx 0.133333 seconds) must pass before we can fire again
+    Side side;
+    SDL_Texture *texture;
+};
+
+struct Stage::Explosion
+{
+    float x;
+    float y;
+    float dx;
+    float dy;
+    int r, g, b, a;
+};
+
+struct Stage::Debris
+{
+    float x;
+    float y;
+    float dx;
+    float dy;
+    int life;
+    SDL_Rect rect;
+    SDL_Texture *texture;
+};
 
 Stage::Stage(int highscore,
              SDL_Renderer *renderer,

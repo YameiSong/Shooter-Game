@@ -1,5 +1,4 @@
 #include "draw.hpp"
-#include "structs.hpp"
 
 void prepareScene(SDL_Renderer* renderer)
 {

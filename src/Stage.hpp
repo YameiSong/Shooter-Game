@@ -2,12 +2,15 @@
 
 #include "Text.hpp"
 #include "AudioPlayer.hpp"
-#include "structs.hpp"
 #include <list>
 #include <memory>
 
 class Stage
 {
+    enum class Side;
+    struct Explosion;
+    struct Debris;
+    struct Entity;
     using EntityIt = std::list<Entity>::iterator;
 
 private:
