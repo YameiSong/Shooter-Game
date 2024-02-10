@@ -1,3 +1,5 @@
+#pragma once
+
 #include "common.hpp"
 #include "defs.hpp"
 #include "draw.hpp"
@@ -8,9 +10,10 @@ class Text
 private:
     SDL_Texture *fontTexture = nullptr;
     std::unique_ptr<char[]> drawTextBuffer;
+    SDL_Renderer *renderer;
 
 public:
-    Text();
+    Text(SDL_Renderer *renderer);
     ~Text();
     template <typename... Args>
     void drawText(int x, int y, int r, int g, int b, const char *format, Args... args);
@@ -39,7 +42,7 @@ void Text::drawText(int x, int y, int r, int g, int b, const char *format, Args.
         if (c >= ' ' && c <= 'Z')
         {
             rect.x = (c - ' ') * GLYPH_WIDTH;
-            blitRect(fontTexture, &rect, x, y);
+            blitRect(renderer, fontTexture, &rect, x, y);
             x += GLYPH_WIDTH;
         }
     }

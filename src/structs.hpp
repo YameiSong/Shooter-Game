@@ -3,19 +3,11 @@
 #include "defs.hpp"
 #include <functional>
 
-struct Delegate
-{
-    std::function<void()> logic;
-    std::function<void()> draw;
-};
-
-struct App
-{
-    SDL_Renderer *renderer = nullptr;
-    SDL_Window *window = nullptr;
-    Delegate delegate;
-    bool keyboard[MAX_KEYBOARD_KEYS];
-};
+// struct Delegate
+// {
+//     std::function<void()> logic;
+//     std::function<void()> draw;
+// };
 
 enum class Side
 {
@@ -57,20 +49,4 @@ struct Debris
     SDL_Texture *texture;
 };
 
-struct Star
-{
-    int x;
-    int y;
-    int speed;
-};
 
-struct Highscore
-{
-    int recent;
-    int score;
-};
-
-struct Highscores
-{
-    Highscore highscore[NUM_HIGHSCORES];
-};

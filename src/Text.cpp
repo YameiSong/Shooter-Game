@@ -1,8 +1,8 @@
 #include "Text.hpp"
 
-Text::Text() : drawTextBuffer(new char[MAX_LINE_LENGTH])
+Text::Text(SDL_Renderer *renderer) : drawTextBuffer(new char[MAX_LINE_LENGTH]), renderer(renderer)
 {
-    fontTexture = loadTexture(FONT_TEXTURE_PATH);
+    fontTexture = loadTexture(renderer, FONT_TEXTURE_PATH);
 }
 
 Text::~Text()

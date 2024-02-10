@@ -1,27 +1,14 @@
-#include "init.hpp"
-#include "input.hpp"
 #include "draw.hpp"
-#include "stage.hpp"
+#include "App.hpp"
 
-App app;
-Stage stage;
+bool keyboard[MAX_KEYBOARD_KEYS];
 
 int main()
 {
     u_int64_t then;
     float remainder;
 
-    initSDL();
-
-    atexit(cleanUp);
-
-    Stage stage;
-
-    app.delegate.logic = [&stage]()
-    { stage.logic(); };
-
-    app.delegate.draw = [&stage]()
-    { stage.draw(); };
+    App app;
 
     then = SDL_GetTicks();
 
@@ -29,15 +16,15 @@ int main()
 
     while (true)
     {
-        prepareScene();
+        prepareScene(app.renderer);
 
-        doInput();
+        app.doInput();
 
-        app.delegate.logic();
+        app.logic();
 
-        app.delegate.draw();
+        app.draw();
 
-        presentScene();
+        presentScene(app.renderer);
 
         capFrameRate(then, remainder);
     }

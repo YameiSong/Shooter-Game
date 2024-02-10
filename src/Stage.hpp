@@ -1,23 +1,20 @@
-#include "structs.hpp"
-#include "audioPlayer.hpp"
+#pragma once
+
 #include "Text.hpp"
+#include "AudioPlayer.hpp"
+#include "structs.hpp"
 #include <list>
 #include <memory>
-#include <vector>
 
 class Stage
 {
     using EntityIt = std::list<Entity>::iterator;
 
 private:
-    void resetStage();
     void initPlayer();
-    void initStarfield();
     void doPlayer();
     void doBullets();
     void doEnemies();
-    void doBackground();
-    void doStarfield();
     void doExplosions();
     void doDebris();
     void doPointsPods();
@@ -33,39 +30,39 @@ private:
     void drawPlayer();
     void drawBullets();
     void drawFighters();
-    void drawBackground();
-    void drawStarfield();
+
     void drawDebris();
     void drawExplosions();
     void drawHud();
     void drawPointsPods();
     void clipPlayer();
 
-    int score = 0;
-    int highscore = 0;
+    int highscore;
     int enemySpawnTimer = 0;
     int stageResetTimer = FPS * 2;
-    int backgroundX = 0;
+
     std::unique_ptr<Entity> player;
     SDL_Texture *playerTexture;
     SDL_Texture *bulletTexture;
     SDL_Texture *enemyTexture;
     SDL_Texture *pointsTexture;
     SDL_Texture *alienBulletTexture;
-    SDL_Texture *backgroundTexture;
     SDL_Texture *explosionTexture;
     std::list<Entity> list_enemy;
     std::list<Entity> list_bullet;
     std::list<Entity> list_point;
     std::list<Explosion> list_explosion;
     std::list<Debris> list_debris;
-    std::vector<Star> stars;
-    AudioPlayer audio_player;
-    Text text;
+    SDL_Renderer *renderer;
+    std::shared_ptr<AudioPlayer> audio_player;
+    std::shared_ptr<Text> text;
 
 public:
-    Stage();
+    Stage(int highscore, SDL_Renderer *renderer, std::shared_ptr<AudioPlayer> audio_player, std::shared_ptr<Text> text);
     ~Stage();
+    void resetStage();
     void logic();
     void draw();
+    bool gameover = false;
+    int score = 0;
 };

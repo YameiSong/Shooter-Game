@@ -31,6 +31,7 @@
 #define PLAYER_DIE_SOUND_PATH "sound/245372__quaker540__hq-explosion.ogg"
 #define ALIEN_DIE_SOUND_PATH "sound/10 Guage Shotgun-SoundBible.com-74120584.ogg"
 #define POINTS_SOUND_PATH "sound/342749__rhodesmas__notification-01.ogg"
+#define BGM "music/Mercury.ogg"
 
 enum Channel {
     CH_Any = -1,

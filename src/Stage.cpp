@@ -8,25 +8,30 @@
 
 using namespace std;
 
-extern App app;
+extern bool keyboard[MAX_KEYBOARD_KEYS];
 
-Stage::Stage() : player(nullptr), stars(MAX_STARS), audio_player()
+Stage::Stage(int highscore,
+             SDL_Renderer *renderer,
+             std::shared_ptr<AudioPlayer> audio_player,
+             std::shared_ptr<Text> text) : player(nullptr),
+                                           highscore(highscore),
+                                           renderer(renderer),
+                                           audio_player(audio_player),
+                                           text(text)
 {
     srand(static_cast<unsigned int>(time(nullptr)));
 
-    playerTexture = loadTexture(PLAYER_TEXTURE_PATH);
+    playerTexture = loadTexture(renderer, PLAYER_TEXTURE_PATH);
 
-    bulletTexture = loadTexture(BULLET_TEXTURE_PATH);
+    bulletTexture = loadTexture(renderer, BULLET_TEXTURE_PATH);
 
-    enemyTexture = loadTexture(ENEMY_TEXTURE_PATH);
+    enemyTexture = loadTexture(renderer, ENEMY_TEXTURE_PATH);
 
-    pointsTexture = loadTexture(POINTS_TEXTURE_PATH);
+    pointsTexture = loadTexture(renderer, POINTS_TEXTURE_PATH);
 
-    alienBulletTexture = loadTexture(ALIEN_BULLET_TEXTURE_PATH);
+    alienBulletTexture = loadTexture(renderer, ALIEN_BULLET_TEXTURE_PATH);
 
-    backgroundTexture = loadTexture(BACKGROUND_TEXTURE_PATH);
-
-    explosionTexture = loadTexture(EXPLOSION_TEXTURE_PATH);
+    explosionTexture = loadTexture(renderer, EXPLOSION_TEXTURE_PATH);
 
     resetStage();
 }
@@ -69,10 +74,6 @@ Stage::~Stage()
 
 void Stage::logic()
 {
-    doBackground();
-
-    doStarfield();
-
     doPlayer();
 
     doEnemies();
@@ -89,18 +90,14 @@ void Stage::logic()
 
     clipPlayer();
 
-    if (player.get() == nullptr && --stageResetTimer <= 0)
+    if (!player && --stageResetTimer <= 0)
     {
-        resetStage();
+        gameover = true;
     }
 }
 
 void Stage::draw()
 {
-    drawBackground();
-
-    drawStarfield();
-
     drawPointsPods();
 
     drawPlayer();
@@ -128,16 +125,6 @@ void Stage::initPlayer()
     SDL_QueryTexture(player->texture, nullptr, nullptr, &player->w, &player->h);
 }
 
-void Stage::initStarfield()
-{
-    for (size_t i = 0; i < MAX_STARS; i++)
-    {
-        stars[i].x = rand() % SCREEN_WIDTH;
-        stars[i].y = rand() % SCREEN_HEIGHT;
-        stars[i].speed = 1 + rand() % 8;
-    }
-}
-
 void Stage::resetStage()
 {
     list_enemy.clear();
@@ -148,18 +135,18 @@ void Stage::resetStage()
 
     initPlayer();
 
-    initStarfield();
-
     score = 0;
 
     enemySpawnTimer = 0;
 
     stageResetTimer = FPS * 3;
+
+    gameover = false;
 }
 
 void Stage::doPlayer()
 {
-    if (player.get() == nullptr)
+    if (!player)
         return;
 
     if (player->health == 0)
@@ -177,30 +164,30 @@ void Stage::doPlayer()
         player->reload--;
     }
 
-    if (app.keyboard[SDL_SCANCODE_UP])
+    if (keyboard[SDL_SCANCODE_UP])
     {
         player->dy = -PLAYER_SPEED;
     }
 
-    if (app.keyboard[SDL_SCANCODE_DOWN])
+    if (keyboard[SDL_SCANCODE_DOWN])
     {
         player->dy = PLAYER_SPEED;
     }
 
-    if (app.keyboard[SDL_SCANCODE_LEFT])
+    if (keyboard[SDL_SCANCODE_LEFT])
     {
         player->dx = -PLAYER_SPEED;
     }
 
-    if (app.keyboard[SDL_SCANCODE_RIGHT])
+    if (keyboard[SDL_SCANCODE_RIGHT])
     {
         player->dx = PLAYER_SPEED;
     }
 
-    if (app.keyboard[SDL_SCANCODE_LCTRL] && player->reload <= 0)
+    if (keyboard[SDL_SCANCODE_LCTRL] && player->reload <= 0)
     {
         fireBullet();
-        audio_player.playSound(SND_Player_Fire, CH_Player);
+        audio_player->playSound(SND_Player_Fire, CH_Player);
     }
 
     player->x += player->dx;
@@ -255,30 +242,9 @@ void Stage::doEnemies()
             if (player.get() != nullptr && --it->reload <= 0)
             {
                 fireAlienBullet(it);
-                audio_player.playSound(SND_Alien_Fire, CH_Alien_Fire);
+                audio_player->playSound(SND_Alien_Fire, CH_Alien_Fire);
             }
             it++;
-        }
-    }
-}
-
-void Stage::doBackground()
-{
-    if (--backgroundX < -SCREEN_WIDTH)
-    {
-        backgroundX = 0;
-    }
-}
-
-void Stage::doStarfield()
-{
-    for (size_t i = 0; i < MAX_STARS; i++)
-    {
-        stars[i].x -= stars[i].speed;
-
-        if (stars[i].x < 0)
-        {
-            stars[i].x = SCREEN_WIDTH + stars[i].x;
         }
     }
 }
@@ -359,7 +325,7 @@ void Stage::doPointsPods()
             it->health = 0;
             score++;
             highscore = max(highscore, score);
-            audio_player.playSound(SND_POINTS, CH_POINTS);
+            audio_player->playSound(SND_POINTS, CH_POINTS);
         }
 
         if (--it->health <= 0)
@@ -425,7 +391,7 @@ bool Stage::bulletHitEnemy(EntityIt bullet)
             collision(bullet->x, bullet->y, bullet->w, bullet->h, it->x, it->y, it->w, it->h))
         {
             addPointsPod(it->x + it->w / 2, it->y + it->h / 2);
-            audio_player.playSound(SND_Alien_Die, CH_Any); // play multiple explosion sounds at the same time
+            audio_player->playSound(SND_Alien_Die, CH_Any); // play multiple explosion sounds at the same time
             score++;
             highscore = max(highscore, score);
             bullet->health = 0;
@@ -443,13 +409,13 @@ bool Stage::bulletHitEnemy(EntityIt bullet)
 
 bool Stage::bulletHitPlayer(EntityIt bullet)
 {
-    if (player.get() == nullptr)
+    if (!player)
         return false;
 
     if (bullet->side != player->side &&
         collision(bullet->x, bullet->y, bullet->w, bullet->h, player->x, player->y, player->w, player->h))
     {
-        audio_player.playSound(SND_Player_Die, CH_Player);
+        audio_player->playSound(SND_Player_Die, CH_Player);
         bullet->health = 0;
         player->health--;
         return true;
@@ -459,7 +425,7 @@ bool Stage::bulletHitPlayer(EntityIt bullet)
 
 bool Stage::enemyHitPlayer(EntityIt enemy)
 {
-    if (player.get() == nullptr)
+    if (!player)
         return false;
 
     if (collision(player->x, player->y, player->w, player->h, enemy->x, enemy->y, enemy->w, enemy->h))
@@ -586,17 +552,17 @@ void Stage::spawnEnemies()
 
 void Stage::drawPlayer()
 {
-    if (player.get() == nullptr)
+    if (!player)
         return;
 
-    blit(player->texture, player->x, player->y);
+    blit(renderer, player->texture, player->x, player->y);
 }
 
 void Stage::drawBullets()
 {
     for (auto it = list_bullet.begin(); it != list_bullet.end(); it++)
     {
-        blit(it->texture, it->x, it->y);
+        blit(renderer, it->texture, it->x, it->y);
     }
 }
 
@@ -604,34 +570,7 @@ void Stage::drawFighters()
 {
     for (auto it = list_enemy.begin(); it != list_enemy.end(); it++)
     {
-        blit(it->texture, it->x, it->y);
-    }
-}
-
-void Stage::drawBackground()
-{
-    SDL_Rect dest;
-
-    for (int x = backgroundX; x < SCREEN_WIDTH; x += SCREEN_WIDTH)
-    {
-        dest.x = x;
-        dest.y = 0;
-        dest.w = SCREEN_WIDTH;
-        dest.h = SCREEN_HEIGHT;
-
-        SDL_RenderCopy(app.renderer, backgroundTexture, nullptr, &dest);
-    }
-}
-
-void Stage::drawStarfield()
-{
-    for (size_t i = 0; i < MAX_STARS; i++)
-    {
-        int c = 32 * stars[i].speed;
-
-        SDL_SetRenderDrawColor(app.renderer, c, c, c, 255);
-
-        SDL_RenderDrawLine(app.renderer, stars[i].x, stars[i].y, stars[i].x + 3, stars[i].y);
+        blit(renderer, it->texture, it->x, it->y);
     }
 }
 
@@ -639,13 +578,13 @@ void Stage::drawDebris()
 {
     for (auto it = list_debris.begin(); it != list_debris.end(); it++)
     {
-        blitRect(it->texture, &it->rect, it->x, it->y);
+        blitRect(renderer, it->texture, &it->rect, it->x, it->y);
     }
 }
 
 void Stage::drawExplosions()
 {
-    SDL_SetRenderDrawBlendMode(app.renderer, SDL_BLENDMODE_ADD);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_ADD);
     SDL_SetTextureBlendMode(explosionTexture, SDL_BLENDMODE_ADD);
 
     for (auto it = list_explosion.begin(); it != list_explosion.end(); it++)
@@ -653,23 +592,23 @@ void Stage::drawExplosions()
         SDL_SetTextureColorMod(explosionTexture, it->r, it->g, it->b);
         SDL_SetTextureAlphaMod(explosionTexture, it->a);
 
-        blit(explosionTexture, it->x, it->y);
+        blit(renderer, explosionTexture, it->x, it->y);
     }
 
-    SDL_SetRenderDrawBlendMode(app.renderer, SDL_BLENDMODE_NONE);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
 
 void Stage::drawHud()
 {
-    text.drawText(10, 10, 255, 255, 255, "SCORE: %03d", score);
+    text->drawText(10, 10, 255, 255, 255, "SCORE: %03d", score);
 
     if (score > 0 && score == highscore)
     {
-        text.drawText(960, 10, 0, 255, 0, "HIGH SCORE: %03d", highscore);
+        text->drawText(960, 10, 0, 255, 0, "HIGH SCORE: %03d", highscore);
     }
     else
     {
-        text.drawText(960, 10, 255, 255, 255, "HIGH SCORE: %03d", highscore);
+        text->drawText(960, 10, 255, 255, 255, "HIGH SCORE: %03d", highscore);
     }
 }
 
@@ -677,14 +616,14 @@ void Stage::drawPointsPods()
 {
     for (auto it = list_point.begin(); it != list_point.end(); it++)
     {
-        blit(it->texture, it->x, it->y);
+        blit(renderer, it->texture, it->x, it->y);
     }
 }
 
 // Stops the player from leave the screen and also prevents them from moving forward any further than about the midway point.
 void Stage::clipPlayer()
 {
-    if (player.get() == nullptr)
+    if (!player)
         return;
 
     if (player->x < 0)
