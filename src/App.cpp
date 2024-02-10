@@ -7,6 +7,7 @@ App::App() : renderer(nullptr),
              background(nullptr),
              text(nullptr),
              audio_player(nullptr),
+             title(nullptr),
              stage(nullptr),
              highscore_table(nullptr)
 {
@@ -17,6 +18,8 @@ App::App() : renderer(nullptr),
     text.reset(new Text(renderer));
 
     audio_player.reset(new AudioPlayer);
+
+    title.reset(new Title(renderer, text));
 
     stage.reset(new Stage(0, renderer, audio_player, text));
 
@@ -98,6 +101,19 @@ void App::logic()
     background->doBackground();
     background->doStarfield();
 
+    if (title->timeout > 0)
+    {
+        title->timeout--;
+
+        if (keyboard[SDL_SCANCODE_LCTRL])
+        {
+            title->timeout = 0;
+            playing = true;
+        }
+
+        return;
+    }
+
     if (!playing)
     {
         highscore_table->logic(inputText);
@@ -131,6 +147,12 @@ void App::draw()
 {
     background->drawBackground();
     background->drawStarfield();
+
+    if (title->timeout > 0)
+    {
+        title->draw();
+        return;
+    }
 
     if (!playing)
     {

@@ -22,6 +22,8 @@
 #define BACKGROUND_TEXTURE_PATH "gfx/background.png"
 #define EXPLOSION_TEXTURE_PATH "gfx/explosion.png"
 #define POINTS_TEXTURE_PATH "gfx/points.png"
+#define SDL2_TEXTURE_PATH "gfx/sdl2.png"
+#define SHOOTER_TEXTURE_PATH "gfx/shooter.png"
 
 #define FONT_TEXTURE_PATH "gfx/font.png"
 

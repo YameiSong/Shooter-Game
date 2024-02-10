@@ -33,7 +33,6 @@ private:
     void drawPlayer();
     void drawBullets();
     void drawFighters();
-
     void drawDebris();
     void drawExplosions();
     void drawHud();

@@ -655,7 +655,10 @@ void Stage::drawPointsPods()
 {
     for (auto it = pointList.begin(); it != pointList.end(); it++)
     {
-        blit(renderer, it->texture, it->x, it->y);
+        if (it->health > FPS * 2 || it->health % 12 < 6)
+        {
+            blit(renderer, it->texture, it->x, it->y);
+        }
     }
 }
 

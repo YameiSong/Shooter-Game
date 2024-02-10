@@ -1,3 +1,5 @@
+
+#include "Title.hpp"
 #include "Stage.hpp"
 #include "HighscoreTable.hpp"
 #include "Text.hpp"
@@ -24,6 +26,7 @@ public:
     SDL_Window *window;
     std::shared_ptr<AudioPlayer> audio_player;
     std::shared_ptr<Text> text;
+    std::unique_ptr<Title> title;
     std::unique_ptr<Stage> stage;
     std::unique_ptr<Background> background;
     std::unique_ptr<HighscoreTable> highscore_table;
