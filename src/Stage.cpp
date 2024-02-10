@@ -86,8 +86,8 @@ Stage::~Stage()
 
     SDL_DestroyTexture(pointsTexture);
 
-    auto it_fighter = list_enemy.begin();
-    while (it_fighter != list_enemy.end())
+    auto it_fighter = enemyList.begin();
+    while (it_fighter != enemyList.end())
     {
         if (it_fighter->texture != nullptr)
         {
@@ -96,8 +96,8 @@ Stage::~Stage()
         it_fighter++;
     }
 
-    auto it_bullet = list_bullet.begin();
-    while (it_bullet != list_bullet.end())
+    auto it_bullet = bulletList.begin();
+    while (it_bullet != bulletList.end())
     {
         if (it_bullet->texture != nullptr)
         {
@@ -166,11 +166,11 @@ void Stage::initPlayer()
 
 void Stage::resetStage()
 {
-    list_enemy.clear();
-    list_bullet.clear();
-    list_point.clear();
-    list_explosion.clear();
-    list_debris.clear();
+    enemyList.clear();
+    bulletList.clear();
+    pointList.clear();
+    explosionList.clear();
+    debrisList.clear();
 
     initPlayer();
 
@@ -235,8 +235,8 @@ void Stage::doPlayer()
 
 void Stage::doBullets()
 {
-    auto it = list_bullet.begin();
-    while (it != list_bullet.end())
+    auto it = bulletList.begin();
+    while (it != bulletList.end())
     {
         it->x += it->dx;
         it->y += it->dy;
@@ -248,7 +248,7 @@ void Stage::doBullets()
             it->x < -it->w ||
             it->y < -it->h)
         {
-            it = list_bullet.erase(it);
+            it = bulletList.erase(it);
         }
         else
         {
@@ -259,8 +259,8 @@ void Stage::doBullets()
 
 void Stage::doEnemies()
 {
-    auto it = list_enemy.begin();
-    while (it != list_enemy.end())
+    auto it = enemyList.begin();
+    while (it != enemyList.end())
     {
         it->x += it->dx;
 
@@ -274,7 +274,7 @@ void Stage::doEnemies()
         // erase out of boundary enemies
         if (it->x < -it->w || it->health == 0 || enemyHitPlayer(it))
         {
-            it = list_enemy.erase(it);
+            it = enemyList.erase(it);
         }
         else
         {
@@ -290,15 +290,15 @@ void Stage::doEnemies()
 
 void Stage::doExplosions()
 {
-    auto it = list_explosion.begin();
-    while (it != list_explosion.end())
+    auto it = explosionList.begin();
+    while (it != explosionList.end())
     {
         it->x += it->dx;
         it->y += it->dy;
 
         if (--it->a <= 0)
         {
-            it = list_explosion.erase(it);
+            it = explosionList.erase(it);
         }
         else
         {
@@ -309,8 +309,8 @@ void Stage::doExplosions()
 
 void Stage::doDebris()
 {
-    auto it = list_debris.begin();
-    while (it != list_debris.end())
+    auto it = debrisList.begin();
+    while (it != debrisList.end())
     {
         it->x += it->dx;
         it->y += it->dy;
@@ -318,7 +318,7 @@ void Stage::doDebris()
 
         if (--it->life <= 0)
         {
-            it = list_debris.erase(it);
+            it = debrisList.erase(it);
         }
         else
         {
@@ -329,8 +329,8 @@ void Stage::doDebris()
 
 void Stage::doPointsPods()
 {
-    auto it = list_point.begin();
-    while (it != list_point.end())
+    auto it = pointList.begin();
+    while (it != pointList.end())
     {
         if (it->x < 0)
         {
@@ -369,7 +369,7 @@ void Stage::doPointsPods()
 
         if (--it->health <= 0)
         {
-            it = list_point.erase(it);
+            it = pointList.erase(it);
         }
         else
         {
@@ -393,7 +393,7 @@ void Stage::fireBullet()
 
     bullet.side = Side::Player;
 
-    list_bullet.emplace_back(move(bullet));
+    bulletList.emplace_back(move(bullet));
 
     player->reload = 8;
 }
@@ -417,14 +417,14 @@ void Stage::fireAlienBullet(EntityIt enemy)
     bullet.dx *= ALIEN_BULLET_SPEED;
     bullet.dy *= ALIEN_BULLET_SPEED;
 
-    list_bullet.emplace_back(move(bullet));
+    bulletList.emplace_back(move(bullet));
 
     enemy->reload = (rand() % FPS * 2);
 }
 
 bool Stage::bulletHitEnemy(EntityIt bullet)
 {
-    for (auto it = list_enemy.begin(); it != list_enemy.end(); it++)
+    for (auto it = enemyList.begin(); it != enemyList.end(); it++)
     {
         if (bullet->side != it->side &&
             collision(bullet->x, bullet->y, bullet->w, bullet->h, it->x, it->y, it->w, it->h))
@@ -519,7 +519,7 @@ void Stage::addExplosions(int x, int y, int num)
         // explosion lifetime
         e.a = rand() % FPS * 3;
 
-        list_explosion.emplace_back(move(e));
+        explosionList.emplace_back(move(e));
     }
 }
 
@@ -547,7 +547,7 @@ void Stage::addDebris(Entity *e)
             d.rect.w = w;
             d.rect.h = h;
 
-            list_debris.emplace_back(move(d));
+            debrisList.emplace_back(move(d));
         }
     }
 }
@@ -567,7 +567,7 @@ void Stage::addPointsPod(int x, int y)
     point.x -= point.w / 2;
     point.y -= point.h / 2;
 
-    list_point.emplace_back(move(point));
+    pointList.emplace_back(move(point));
 }
 
 void Stage::spawnEnemies()
@@ -585,7 +585,7 @@ void Stage::spawnEnemies()
         enemy.side = Side::Alien;
         enemy.reload = FPS * (1 + (rand() % 3));
         enemySpawnTimer = 60 + (rand() % 60);
-        list_enemy.emplace_back(move(enemy));
+        enemyList.emplace_back(move(enemy));
     }
 }
 
@@ -599,7 +599,7 @@ void Stage::drawPlayer()
 
 void Stage::drawBullets()
 {
-    for (auto it = list_bullet.begin(); it != list_bullet.end(); it++)
+    for (auto it = bulletList.begin(); it != bulletList.end(); it++)
     {
         blit(renderer, it->texture, it->x, it->y);
     }
@@ -607,7 +607,7 @@ void Stage::drawBullets()
 
 void Stage::drawFighters()
 {
-    for (auto it = list_enemy.begin(); it != list_enemy.end(); it++)
+    for (auto it = enemyList.begin(); it != enemyList.end(); it++)
     {
         blit(renderer, it->texture, it->x, it->y);
     }
@@ -615,7 +615,7 @@ void Stage::drawFighters()
 
 void Stage::drawDebris()
 {
-    for (auto it = list_debris.begin(); it != list_debris.end(); it++)
+    for (auto it = debrisList.begin(); it != debrisList.end(); it++)
     {
         blitRect(renderer, it->texture, &it->rect, it->x, it->y);
     }
@@ -626,7 +626,7 @@ void Stage::drawExplosions()
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_ADD);
     SDL_SetTextureBlendMode(explosionTexture, SDL_BLENDMODE_ADD);
 
-    for (auto it = list_explosion.begin(); it != list_explosion.end(); it++)
+    for (auto it = explosionList.begin(); it != explosionList.end(); it++)
     {
         SDL_SetTextureColorMod(explosionTexture, it->r, it->g, it->b);
         SDL_SetTextureAlphaMod(explosionTexture, it->a);
@@ -653,7 +653,7 @@ void Stage::drawHud()
 
 void Stage::drawPointsPods()
 {
-    for (auto it = list_point.begin(); it != list_point.end(); it++)
+    for (auto it = pointList.begin(); it != pointList.end(); it++)
     {
         blit(renderer, it->texture, it->x, it->y);
     }

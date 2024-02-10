@@ -5,7 +5,6 @@
 #define FPS 60
 #define MAX_KEYBOARD_KEYS 350
 #define MAX_LINE_LENGTH 1024
-#define MAX_SCORE_NAME_LENGTH 16
 #define GLYPH_WIDTH 18
 #define GLYPH_HEIGHT 24
 

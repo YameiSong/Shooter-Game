@@ -51,11 +51,11 @@ private:
     SDL_Texture *pointsTexture;
     SDL_Texture *alienBulletTexture;
     SDL_Texture *explosionTexture;
-    std::list<Entity> list_enemy;
-    std::list<Entity> list_bullet;
-    std::list<Entity> list_point;
-    std::list<Explosion> list_explosion;
-    std::list<Debris> list_debris;
+    std::list<Entity> enemyList;
+    std::list<Entity> bulletList;
+    std::list<Entity> pointList;
+    std::list<Explosion> explosionList;
+    std::list<Debris> debrisList;
     SDL_Renderer *renderer;
     std::shared_ptr<AudioPlayer> audio_player;
     std::shared_ptr<Text> text;

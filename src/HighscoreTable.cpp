@@ -9,8 +9,8 @@ HighscoreTable::HighscoreTable(SDL_Renderer *renderer,
                                std::shared_ptr<Text> text) : recent(highscores.end()),
                                                              renderer(renderer),
                                                              text(text),
-                                                             cursor_blink(0),
-                                                             input_done(false)
+                                                             cursorBlink(0),
+                                                             inputDone(false)
 {
     name.clear();
 
@@ -27,15 +27,15 @@ void HighscoreTable::logic(std::string &inputText)
         doNameInput(inputText);
     }
 
-    if (++cursor_blink >= FPS)
+    if (++cursorBlink >= FPS)
     {
-        cursor_blink = 0;
+        cursorBlink = 0;
     }
 }
 
 void HighscoreTable::draw()
 {
-    if (recent != highscores.end() && !input_done)
+    if (recent != highscores.end() && !inputDone)
     {
         drawName();
     }
@@ -81,7 +81,7 @@ void HighscoreTable::drawName()
 
     text->drawText(SCREEN_WIDTH / 2, 250, 128, 255, 128, ALIGN_CENTER, "%s", name.c_str());
 
-    if (cursor_blink < FPS / 2)
+    if (cursorBlink < FPS / 2)
     {
         r.x = SCREEN_WIDTH / 2 + name.size() * GLYPH_WIDTH / 2 + 5;
         r.y = 250;
@@ -97,7 +97,7 @@ void HighscoreTable::drawName()
 
 void HighscoreTable::addHighscore(int score)
 {
-    input_done = false;
+    inputDone = false;
 
     Highscore x{score, ANONYMOUS};
 
@@ -131,10 +131,10 @@ void HighscoreTable::doNameInput(std::string &inputText)
         keyboard[SDL_SCANCODE_BACKSPACE] = false;
     }
 
-    if (keyboard[SDL_SCANCODE_RETURN] && !input_done)
+    if (keyboard[SDL_SCANCODE_RETURN] && !inputDone)
     {
         recent->name = name;
         name.clear();
-        input_done = true;
+        inputDone = true;
     }
 }

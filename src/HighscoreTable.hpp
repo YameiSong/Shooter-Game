@@ -16,8 +16,8 @@ private:
         }
     };
     std::string name;
-    int cursor_blink;
-    bool input_done;
+    int cursorBlink;
+    bool inputDone;
     std::list<Highscore> highscores;
     std::list<Highscore>::iterator recent;
     std::shared_ptr<Text> text;
