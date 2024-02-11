@@ -9,55 +9,33 @@ class Text
 {
 private:
     SDL_Texture *fontTexture = nullptr;
+    SDL_Color white;
     std::unique_ptr<char[]> drawTextBuffer;
     SDL_Renderer *renderer;
+    TTF_Font *titleFont;
+    TTF_Font *cmdFont;
+    SDL_Texture *getTextTexture(char *text, bool isTitle);
+    SDL_Texture *toTexture(SDL_Surface *surface, bool destroySurface);
 
 public:
     Text(SDL_Renderer *renderer);
     ~Text();
     template <typename... Args>
-    void drawText(int x, int y, int r, int g, int b, int align, const char *format, Args... args);
+    void drawText(int x, int y, int r, int g, int b, int align, bool isTitle, const char *format, Args... args);
 };
 
 template <typename... Args>
-void Text::drawText(int x, int y, int r, int g, int b, int align, const char *format, Args... args)
+void Text::drawText(int x, int y, int r, int g, int b, int align, bool isTitle, const char *format, Args... args)
 {
-    int i, len, c;
-    SDL_Rect rect;
-
     sprintf(drawTextBuffer.get(), format, args...);
 
-    len = strlen(drawTextBuffer.get());
+    int len = strlen(drawTextBuffer.get());
 
-    switch (align)
-    {
-    case ALIGN_RIGHT:
-        x -= len * GLYPH_WIDTH;
-        break;
+    // TODO: align
 
-    case ALIGN_CENTER:
-        x -= len * GLYPH_WIDTH / 2;
-        break;
-    
-    default:
-        break;
-    }
+    SDL_Texture *texture = getTextTexture(drawTextBuffer.get(), isTitle, color);
 
-    rect.w = GLYPH_WIDTH;
-    rect.h = GLYPH_HEIGHT;
-    rect.y = 0;
+    SDL_SetTextureColorMod(texture, r, g, b);
 
-    SDL_SetTextureColorMod(fontTexture, r, g, b);
-
-    for (i = 0; i < len; i++)
-    {
-        c = drawTextBuffer[i];
-
-        if (c >= ' ' && c <= 'Z')
-        {
-            rect.x = (c - ' ') * GLYPH_WIDTH;
-            blitRect(renderer, fontTexture, &rect, x, y);
-            x += GLYPH_WIDTH;
-        }
-    }
+    blit(renderer, texture, x, y);
 }

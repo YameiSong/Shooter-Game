@@ -26,6 +26,7 @@
 #define SHOOTER_TEXTURE_PATH "gfx/shooter.png"
 
 #define FONT_TEXTURE_PATH "gfx/font.png"
+#define FONT_PATH "font/Antonio-Regular.ttf"
 
 #define MAX_SOUND_CHANNELS 8
 

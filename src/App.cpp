@@ -75,12 +75,17 @@ void App::initSDL()
 
     if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) == -1)
     {
-        printf("Couldn't initialize SDL Mixer\n");
-        SDL_Log("Mixer Initialization Error: %s", Mix_GetError());
+        printf("Couldn't initialize SDL Mixer: %s\n", Mix_GetError());
         exit(1);
     }
 
     Mix_AllocateChannels(MAX_SOUND_CHANNELS);
+
+    if (TTF_Init() < 0)
+    {
+        printf("Couldn't initialize SDL TTF: %s\n", SDL_GetError());
+	    exit(1);
+    }
 }
 
 void App::cleanUp()
@@ -93,6 +98,8 @@ void App::cleanUp()
     window = nullptr;
     SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Destory window");
 
+    TTF_Quit();
+    
     SDL_Quit();
 }
 
