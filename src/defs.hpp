@@ -25,6 +25,8 @@
 #define SDL2_TEXTURE_PATH "gfx/sdl2.png"
 #define SHOOTER_TEXTURE_PATH "gfx/shooter.png"
 
+#define NUME_GLYPHS 128
+#define FONT_TEXTURE_SIZE 512
 #define FONT_TEXTURE_PATH "gfx/font.png"
 #define FONT_PATH "font/Antonio-Regular.ttf"
 
@@ -57,4 +59,10 @@ enum TEXT_ALIGN {
     ALIGN_LEFT,
     ALIGN_CENTER,
     ALIGN_RIGHT
+};
+
+enum FONT {
+    FONT_COMMAND,
+    FONT_TITLE,
+    FONT_MAX
 };
