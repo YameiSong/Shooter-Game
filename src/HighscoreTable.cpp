@@ -47,9 +47,9 @@ void HighscoreTable::draw()
 
 void HighscoreTable::drawHighscore()
 {
-    int y = 150;
+    int y = 250;
 
-    text->drawText(SCREEN_WIDTH / 2, 70, 255, 255, 255, ALIGN_CENTER, "%s", "HIGHSCORES");
+    text->drawText(SCREEN_WIDTH / 2, 70, 255, 255, 255, FONT_TITLE, ALIGN_CENTER, "%s", "High Scores");
 
     auto it = highscores.begin();
 
@@ -63,36 +63,37 @@ void HighscoreTable::drawHighscore()
             b = 0;
         }
 
-        text->drawText(SCREEN_WIDTH / 2, y, r, g, b, ALIGN_CENTER, "#%d. %-15s ...... %03d", i + 1, it->name.c_str(), it->score);
+        text->drawText(SCREEN_WIDTH / 2 - 200, y, r, g, b, FONT_COMMAND, ALIGN_LEFT, "#%d. %-15s", i + 1, it->name.c_str(), it->score);
+        text->drawText(SCREEN_WIDTH / 2 + 50, y, r, g, b, FONT_COMMAND, ALIGN_LEFT, "............ %03d", it->score);
 
         y += 50;
     }
 
-    text->drawText(SCREEN_WIDTH / 2, 600, 255, 255, 255, ALIGN_CENTER, "%s", "PRESS FIRE TO PLAY!");
+    text->drawText(SCREEN_WIDTH / 2, 600, 255, 255, 255, FONT_COMMAND, ALIGN_CENTER, "%s", "Press fire to play!");
 }
 
 void HighscoreTable::drawName()
 {
     SDL_Rect r;
 
-    text->drawText(SCREEN_WIDTH / 2, 70, 255, 255, 255, ALIGN_CENTER, "%s", "CONGRATULATIONS, YOU'VE GAINED A HIGHSCORE!");
+    text->drawText(SCREEN_WIDTH / 2, 70, 255, 255, 255, FONT_TITLE, ALIGN_CENTER, "%s", "Congratulations, you've gained a high score!");
 
-    text->drawText(SCREEN_WIDTH / 2, 120, 255, 255, 255, ALIGN_CENTER, "%s", "ENTER YOUR NAME BELOW:");
+    text->drawText(SCREEN_WIDTH / 2, 200, 255, 255, 255, FONT_COMMAND, ALIGN_CENTER, "%s", "Enter your name below:");
 
-    text->drawText(SCREEN_WIDTH / 2, 250, 128, 255, 128, ALIGN_CENTER, "%s", name.c_str());
+    text->drawText(SCREEN_WIDTH / 2, 300, 128, 255, 128, FONT_COMMAND, ALIGN_CENTER, "%s", name.c_str());
 
-    if (cursorBlink < FPS / 2)
-    {
-        r.x = SCREEN_WIDTH / 2 + name.size() * GLYPH_WIDTH / 2 + 5;
-        r.y = 250;
-        r.w = GLYPH_WIDTH;
-        r.h = GLYPH_HEIGHT;
+    // if (cursorBlink < FPS / 2)
+    // {
+    //     r.x = SCREEN_WIDTH / 2 + name.size() * GLYPH_WIDTH;
+    //     r.y = 250;
+    //     r.w = 5;
+    //     r.h = GLYPH_HEIGHT;
 
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-        SDL_RenderFillRect(renderer, &r);
-    }
+    //     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    //     SDL_RenderFillRect(renderer, &r);
+    // }
 
-    text->drawText(SCREEN_WIDTH / 2, 625, 255, 255, 255, ALIGN_CENTER, "%s", "PRESS RETURN WHEN FINISHED");
+    text->drawText(SCREEN_WIDTH / 2, 625, 255, 255, 255, FONT_COMMAND, ALIGN_CENTER, "%s", "Press return when finished");
 }
 
 void HighscoreTable::addHighscore(int score)
@@ -118,10 +119,6 @@ void HighscoreTable::doNameInput(std::string &inputText)
 {
     if (!inputText.empty())
     {
-        for (char &c : inputText)
-        {
-            c = std::toupper(c);
-        }
         name.append(inputText);
     }
 

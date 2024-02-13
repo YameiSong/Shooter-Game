@@ -1,11 +1,12 @@
 #include "Text.hpp"
+#include <algorithm>
 
 Text::Text(SDL_Renderer *renderer) : drawTextBuffer(new char[MAX_LINE_LENGTH]),
                                      renderer(renderer)
 {
-    white = {0, 0, 0, 0};
-    initFont(FONT_COMMAND, 16, FONT_PATH);
-    initFont(FONT_TITLE, 32, FONT_PATH);
+    white = {255, 255, 255, 255};
+    initFont(FONT_COMMAND, 32, FONT_PATH);
+    initFont(FONT_TITLE, 60, FONT_PATH);
 }
 
 Text::~Text()
@@ -23,7 +24,7 @@ void Text::initFont(int fontType, int fontSize, const char *filename)
 
     fonts[fontType] = TTF_OpenFont(filename, fontSize);
 
-    // treat white as transparent
+    // treat surface background as transparent
     surface = SDL_CreateRGBSurface(0, FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE, 32, 0, 0, 0, 0xff);
     SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGBA(surface->format, 0, 0, 0, 0));
 
@@ -87,4 +88,22 @@ SDL_Texture *Text::toTexture(SDL_Surface *surface, bool destroySurface)
     }
 
     return texture;
+}
+
+void Text::calcTextDimensions(char* text, int fontType, int& w, int& h)
+{
+    SDL_Rect *g;
+
+    w = h = 0;
+
+    int ch;
+
+    for (int i=0; text[i] != '\0'; i++)
+    {
+        ch = text[i];
+        g = &glyphs[fontType][ch];
+
+        w += g->w;
+        h = std::max(h, g->h);
+    }
 }

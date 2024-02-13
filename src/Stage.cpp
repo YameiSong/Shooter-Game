@@ -158,7 +158,7 @@ void Stage::initPlayer()
     player->x = 100;
     player->y = 100;
     player->side = Side::Player;
-    player->health = 10;
+    player->health = 5;
     player->reload = 0;
     player->texture = playerTexture;
     SDL_QueryTexture(player->texture, nullptr, nullptr, &player->w, &player->h);
@@ -639,15 +639,15 @@ void Stage::drawExplosions()
 
 void Stage::drawHud()
 {
-    text->drawText(10, 10, 255, 255, 255, ALIGN_LEFT, "SCORE: %03d", score);
+    text->drawText(10, 10, 255, 255, 255, FONT_COMMAND, ALIGN_LEFT, "Score: %03d", score);
 
     if (score > 0 && score == highscore)
     {
-        text->drawText(960, 10, 0, 255, 0, ALIGN_LEFT, "HIGH SCORE: %03d", highscore);
+        text->drawText(SCREEN_WIDTH - 200, 10, 0, 255, 0, FONT_COMMAND, ALIGN_LEFT, "High Score: %03d", highscore);
     }
     else
     {
-        text->drawText(960, 10, 255, 255, 255, ALIGN_LEFT, "HIGH SCORE: %03d", highscore);
+        text->drawText(SCREEN_WIDTH - 200, 10, 255, 255, 255, FONT_COMMAND, ALIGN_LEFT, "High Score: %03d", highscore);
     }
 }
 

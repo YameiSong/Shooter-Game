@@ -5,15 +5,15 @@
 #define FPS 60
 #define MAX_KEYBOARD_KEYS 350
 #define MAX_LINE_LENGTH 1024
-#define GLYPH_WIDTH 18
-#define GLYPH_HEIGHT 24
+#define GLYPH_WIDTH 14.5
+#define GLYPH_HEIGHT 38
 
 #define PLAYER_SPEED 4
 #define PLAYER_BULLET_SPEED 16
 #define ALIEN_BULLET_SPEED 8
 #define MAX_STARS 500
-#define NUM_HIGHSCORES 8
-#define ANONYMOUS "ANONYMOUS"
+#define NUM_HIGHSCORES 5
+#define ANONYMOUS "Anonymous"
 
 #define PLAYER_TEXTURE_PATH "gfx/player.png"
 #define BULLET_TEXTURE_PATH "gfx/playerBullet.png"
@@ -26,7 +26,7 @@
 #define SHOOTER_TEXTURE_PATH "gfx/shooter.png"
 
 #define NUME_GLYPHS 128
-#define FONT_TEXTURE_SIZE 512
+#define FONT_TEXTURE_SIZE 2048
 #define FONT_TEXTURE_PATH "gfx/font.png"
 #define FONT_PATH "font/Antonio-Regular.ttf"
 

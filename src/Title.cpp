@@ -17,7 +17,7 @@ Title::Title(SDL_Renderer *renderer,
 Title::~Title()
 {
     SDL_DestroyTexture(sdl2Texture);
-    
+
     SDL_DestroyTexture(shooterTexture);
 }
 
@@ -32,7 +32,7 @@ void Title::draw()
 
     if (timeout % 40 < 20)
     {
-        text->drawText(SCREEN_WIDTH / 2, 600, 255, 255, 255, ALIGN_CENTER, "%s", "PRESS FIRE TO PLAY!");
+        text->drawText(SCREEN_WIDTH / 2, 600, 255, 255, 255, FONT_COMMAND, ALIGN_CENTER, "%s", "PRESS FIRE TO PLAY!");
     }
 }
 

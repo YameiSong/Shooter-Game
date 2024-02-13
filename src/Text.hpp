@@ -17,26 +17,38 @@ private:
     void initFont(int fontType, int fontSize, const char *filename);
     SDL_Texture *getTextTexture(char *text, int fontType);
     SDL_Texture *toTexture(SDL_Surface *surface, bool destroySurface);
-
+    void calcTextDimensions(char* text, int fontType, int& w, int& h);
 public:
     Text(SDL_Renderer *renderer);
     ~Text();
     template <typename... Args>
-    void drawText(int x, int y, int r, int g, int b, int align, const char *format, Args... args);
+    void drawText(int x, int y, int r, int g, int b, int fontType, int align, const char *format, Args... args);
 };
 
 template <typename... Args>
-void Text::drawText(int x, int y, int r, int g, int b, int align, const char *format, Args... args)
+void Text::drawText(int x, int y, int r, int g, int b, int fontType, int align, const char *format, Args... args)
 {
-    int fontType = FONT_COMMAND;
-
     sprintf(drawTextBuffer.get(), format, args...);
 
-    // TODO: align
+    int w, h;
+
+    if (align != ALIGN_LEFT)
+    {
+        calcTextDimensions(drawTextBuffer.get(), fontType, w, h);
+
+        if (align == ALIGN_CENTER)
+            x -= w / 2;
+        else if (align == ALIGN_RIGHT)
+            x -= w;
+    }
 
     SDL_Rect *glyph, dest;
 
-    SDL_SetTextureColorMod(fontTextures[fontType], r, g, b);
+    if (SDL_SetTextureColorMod(fontTextures[fontType], r, g, b) < 0)
+    {
+        printf("SDL_SetTextureColorMod failed: %s\n", SDL_GetError());
+        exit(1);
+    }
 
     int ch;
 
@@ -50,7 +62,11 @@ void Text::drawText(int x, int y, int r, int g, int b, int align, const char *fo
         dest.w = glyph->w;
         dest.h = glyph->h;
 
-        SDL_RenderCopy(renderer, fontTextures[fontType], glyph, &dest);
+        if (SDL_RenderCopy(renderer, fontTextures[fontType], glyph, &dest) < 0)
+        {
+            printf("SDL_RenderCopy failed: %s\n", SDL_GetError());
+            exit(1);
+        }
 
         x += glyph->w;
     }
